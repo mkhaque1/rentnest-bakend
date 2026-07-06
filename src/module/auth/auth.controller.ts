@@ -3,6 +3,7 @@ import httpStatus from 'http-status';
 import { catchAsync } from '../../utils/cathAsync';
 import { sendResponse } from '../../utils/sendResponse';
 import { AuthServices } from './auth.service';
+import { AuthRequest } from '../../middlewares/auth';
 
 const register = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthServices.register(req.body);
@@ -24,4 +25,14 @@ const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const AuthControllers = { register, login };
+const getMe = catchAsync(async (req: AuthRequest, res: Response) => {
+  const result = await AuthServices.getMe(req.user!.id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Current user retrieved successfully',
+    data: result,
+  });
+});
+
+export const AuthControllers = { register, login, getMe };

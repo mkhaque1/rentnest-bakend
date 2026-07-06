@@ -5,6 +5,7 @@ import {
   registerValidationSchema,
   loginValidationSchema,
 } from './auth.validation';
+import { authenticate } from '../../middlewares/auth';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.post(
   validateRequest(loginValidationSchema),
   AuthControllers.login,
 );
+router.get('/me', authenticate, AuthControllers.getMe);
 
 export const AuthRoutes = router;
