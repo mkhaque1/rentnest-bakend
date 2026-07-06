@@ -23,3 +23,8 @@ export interface IAuthResult {
     role: Role;
   };
 }
+
+export interface IJwtUser {
+  id: string;
+  role: string;
+}
