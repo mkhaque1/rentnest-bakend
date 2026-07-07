@@ -1,7 +1,10 @@
 import httpStatus from 'http-status';
 import { prisma } from '../../lib/prisma';
 import { AppError } from '../../utils/AppError';
-import { ICreateRentalRequestPayload } from './rental.interface';
+import {
+  ICreateRentalRequestPayload,
+  IUpdateRentalStatusPayload,
+} from './rental.interface';
 
 const createRentalRequest = async (
   tenantId: string,
@@ -88,8 +91,55 @@ const getRentalRequestById = async (
   return rental;
 };
 
+const getLandlordRentalRequests = async (landlordId: string) => {
+  return prisma.rentalRequest.findMany({
+    where: { property: { landlordId } },
+    include: {
+      property: true,
+      tenant: { select: { id: true, name: true, email: true, phone: true } },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
+const updateRentalStatus = async (
+  rentalId: string,
+  landlordId: string,
+  payload: IUpdateRentalStatusPayload,
+) => {
+  const rental = await prisma.rentalRequest.findUnique({
+    where: { id: rentalId },
+    include: { property: true },
+  });
+
+  if (!rental) {
+    throw new AppError('Rental request not found', httpStatus.NOT_FOUND);
+  }
+
+  if (rental.property.landlordId !== landlordId) {
+    throw new AppError(
+      'You can only manage requests for your own properties',
+      httpStatus.FORBIDDEN,
+    );
+  }
+
+  if (rental.status !== 'PENDING') {
+    throw new AppError(
+      `This request has already been ${rental.status.toLowerCase()} and cannot be changed`,
+      httpStatus.BAD_REQUEST,
+    );
+  }
+
+  return prisma.rentalRequest.update({
+    where: { id: rentalId },
+    data: { status: payload.status },
+  });
+};
+
 export const RentalServices = {
   createRentalRequest,
   getMyRentalRequests,
   getRentalRequestById,
+  getLandlordRentalRequests,
+  updateRentalStatus,
 };
