@@ -9,13 +9,23 @@ import { AuthRoutes } from './module/auth/auth.routes';
 import { CategoryRoutes } from './module/category/category.routes';
 import { PropertyRoutes } from './module/property/property.routes';
 import { RentalRoutes } from './module/rental/rental.routes';
-import { PaymentRoutes } from './module/payment/payment.routes';
+import {
+  PaymentRoutes,
+  StripeWebhookRoute,
+} from './module/payment/payment.routes';
 
 const app = express();
 
 app.use(helmet());
 app.use(cors());
 app.use(morgan('dev'));
+
+app.use(
+  '/api/payments/webhook',
+  express.raw({ type: 'application/json' }),
+  StripeWebhookRoute,
+);
+
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
