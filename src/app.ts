@@ -7,6 +7,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import { notFound } from './middlewares/notFound';
 import { AuthRoutes } from './module/auth/auth.routes';
 import { CategoryRoutes } from './module/category/category.routes';
+import { PropertyRouts } from './module/property/property.routes';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use('/api/auth', AuthRoutes);
 app.use('/api/categories', CategoryRoutes);
+app.use('/api/properties', PropertyRouts);
 
 // not found and error pages
 app.use(notFound);
