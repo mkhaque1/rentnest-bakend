@@ -24,7 +24,7 @@ app.get('/', (req: Request, res: Response) => {
 // (all module routes will be added here)
 
 app.use('/api/auth', AuthRoutes);
-app.use('/api/category', CategoryRoutes);
+app.use('/api/categories', CategoryRoutes);
 
 // not found and error pages
 app.use(notFound);
