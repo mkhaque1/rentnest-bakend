@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { errorHandler } from './middlewares/errorHandler';
 import { notFound } from './middlewares/notFound';
 import { AuthRoutes } from './module/auth/auth.routes';
+import { CategoryRoutes } from './module/category/category.routes';
 
 const app = express();
 
@@ -23,7 +24,9 @@ app.get('/', (req: Request, res: Response) => {
 // (all module routes will be added here)
 
 app.use('/api/auth', AuthRoutes);
+app.use('/api/category', CategoryRoutes);
 
+// not found and error pages
 app.use(notFound);
 app.use(errorHandler);
 
