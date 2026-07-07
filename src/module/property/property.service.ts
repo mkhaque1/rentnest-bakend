@@ -1,7 +1,11 @@
 import httpStatus from 'http-status';
 
 import { AppError } from '../../utils/AppError';
-import { IPropertyFilters } from './property.interface';
+import {
+  IPropertyFilters,
+  ICreatePropertyPayload,
+  IUpdatePropertyPayload,
+} from './property.interface';
 import { prisma } from '../../lib/prisma';
 
 const getAllProperties = async (filters: IPropertyFilters) => {
@@ -61,4 +65,82 @@ const getPropertyById = async (id: string) => {
   return property;
 };
 
-export const PropertyServices = { getAllProperties, getPropertyById };
+const createProperty = async (
+  landlordId: string,
+  payload: ICreatePropertyPayload,
+) => {
+  const category = await prisma.category.findUnique({
+    where: { id: payload.categoryId },
+  });
+  if (!category) {
+    throw new AppError('Category not found', httpStatus.NOT_FOUND);
+  }
+
+  return prisma.property.create({
+    data: { ...payload, landlordId },
+  });
+};
+
+const updateProperty = async (
+  propertyId: string,
+  landlordId: string,
+  payload: IUpdatePropertyPayload,
+) => {
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+  });
+  if (!property) {
+    throw new AppError('Property not found', httpStatus.NOT_FOUND);
+  }
+  if (property.landlordId !== landlordId) {
+    throw new AppError(
+      'You can only update your own properties',
+      httpStatus.FORBIDDEN,
+    );
+  }
+
+  if (payload.categoryId) {
+    const category = await prisma.category.findUnique({
+      where: { id: payload.categoryId },
+    });
+    if (!category) {
+      throw new AppError('Category not found', httpStatus.NOT_FOUND);
+    }
+  }
+
+  return prisma.property.update({ where: { id: propertyId }, data: payload });
+};
+
+const deleteProperty = async (propertyId: string, landlordId: string) => {
+  const property = await prisma.property.findUnique({
+    where: { id: propertyId },
+  });
+  if (!property) {
+    throw new AppError('Property not found', httpStatus.NOT_FOUND);
+  }
+  if (property.landlordId !== landlordId) {
+    throw new AppError(
+      'You can only delete your own properties',
+      httpStatus.FORBIDDEN,
+    );
+  }
+
+  await prisma.property.delete({ where: { id: propertyId } });
+};
+
+const getMyProperties = async (landlordId: string) => {
+  return prisma.property.findMany({
+    where: { landlordId },
+    include: { category: true },
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
+export const PropertyServices = {
+  getAllProperties,
+  getPropertyById,
+  createProperty,
+  updateProperty,
+  deleteProperty,
+  getMyProperties,
+};
