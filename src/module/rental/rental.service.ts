@@ -123,9 +123,16 @@ const updateRentalStatus = async (
     );
   }
 
-  if (rental.status !== 'PENDING') {
+  const validTransitions: Record<string, string[]> = {
+    PENDING: ['APPROVED', 'REJECTED'],
+    ACTIVE: ['COMPLETED'],
+  };
+
+  const allowedNextStatuses = validTransitions[rental.status] || [];
+
+  if (!allowedNextStatuses.includes(payload.status)) {
     throw new AppError(
-      `This request has already been ${rental.status.toLowerCase()} and cannot be changed`,
+      `Cannot change status from ${rental.status} to ${payload.status}`,
       httpStatus.BAD_REQUEST,
     );
   }

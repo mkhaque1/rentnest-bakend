@@ -14,8 +14,8 @@ export const createRentalRequestValidationSchema = z.object({
 
 export const updateRentalStatusValidationSchema = z.object({
   body: z.object({
-    status: z.enum(['APPROVED', 'REJECTED'], {
-      error: 'Status must be APPROVED or REJECTED',
+    status: z.enum(['APPROVED', 'REJECTED', 'COMPLETED'], {
+      error: 'Status must be APPROVED, REJECTED, or COMPLETED',
     }),
   }),
 });
