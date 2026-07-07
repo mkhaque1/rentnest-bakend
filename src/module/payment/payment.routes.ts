@@ -14,4 +14,9 @@ router.post(
   PaymentControllers.createPaymentSession,
 );
 
+const webhookRouter = Router();
+webhookRouter.post('/', PaymentControllers.handleStripeWebhook);
+
+export const StripeWebhookRoute = webhookRouter;
+
 export const PaymentRoutes = router;

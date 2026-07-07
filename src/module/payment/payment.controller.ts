@@ -45,4 +45,4 @@ const handleStripeWebhook = catchAsync(async (req: Request, res: Response) => {
   res.status(httpStatus.OK).json({ received: true });
 });
 
-export const PaymentControllers = { createPaymentSession };
+export const PaymentControllers = { createPaymentSession, handleStripeWebhook };
