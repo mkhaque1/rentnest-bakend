@@ -8,6 +8,7 @@ import { notFound } from './middlewares/notFound';
 import { AuthRoutes } from './module/auth/auth.routes';
 import { CategoryRoutes } from './module/category/category.routes';
 import { PropertyRoutes } from './module/property/property.routes';
+import { RentalRoutes } from './module/rental/rental.routes';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/auth', AuthRoutes);
 app.use('/api/categories', CategoryRoutes);
 app.use('/api/properties', PropertyRoutes);
+app.use('/api/rentals', RentalRoutes);
 
 // not found and error pages
 app.use(notFound);
