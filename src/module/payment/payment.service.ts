@@ -4,6 +4,7 @@ import stripe from '../../config/stripe';
 import config from '../../config';
 import { AppError } from '../../utils/AppError';
 import { ICreatePaymentPayload } from './payment.interface';
+import Stripe from 'stripe';
 
 const createPaymentSession = async (
   tenantId: string,
@@ -78,4 +79,42 @@ const createPaymentSession = async (
   return { checkoutUrl: session.url, payment };
 };
 
-export const PaymentServices = { createPaymentSession };
+const handleWebhookEvent = async (event: Stripe.Event) => {
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    const payment = await prisma.payment.findUnique({
+      where: { transactionId: session.id },
+    });
+
+    if (!payment) {
+      console.error('Webhook received for unknown session:', session.id);
+      return;
+    }
+
+    if (payment.status === 'COMPLETED') {
+      return; // already processed — avoid double-processing if Stripe retries the webhook
+    }
+
+    await prisma.$transaction([
+      prisma.payment.update({
+        where: { id: payment.id },
+        data: { status: 'COMPLETED', paidAt: new Date() },
+      }),
+      prisma.rentalRequest.update({
+        where: { id: payment.rentalRequestId },
+        data: { status: 'ACTIVE' },
+      }),
+    ]);
+  }
+
+  if (event.type === 'checkout.session.expired') {
+    const session = event.data.object as Stripe.Checkout.Session;
+    await prisma.payment.updateMany({
+      where: { transactionId: session.id, status: 'PENDING' },
+      data: { status: 'FAILED' },
+    });
+  }
+};
+
+export const PaymentServices = { createPaymentSession, handleWebhookEvent };
