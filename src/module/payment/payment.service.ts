@@ -117,4 +117,39 @@ const handleWebhookEvent = async (event: Stripe.Event) => {
   }
 };
 
-export const PaymentServices = { createPaymentSession, handleWebhookEvent };
+const getMyPayments = async (userId: string) => {
+  return prisma.payment.findMany({
+    where: { userId },
+    include: { rentalRequest: { include: { property: true } } },
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
+const getPaymentById = async (id: string, userId: string, role: string) => {
+  const payment = await prisma.payment.findUnique({
+    where: { id },
+    include: { rentalRequest: { include: { property: true } } },
+  });
+
+  if (!payment) {
+    throw new AppError('Payment not found', httpStatus.NOT_FOUND);
+  }
+
+  const isOwner = payment.userId === userId;
+
+  if (role !== 'ADMIN' && !isOwner) {
+    throw new AppError(
+      'You do not have access to this payment',
+      httpStatus.FORBIDDEN,
+    );
+  }
+
+  return payment;
+};
+
+export const PaymentServices = {
+  createPaymentSession,
+  handleWebhookEvent,
+  getMyPayments,
+  getPaymentById,
+};

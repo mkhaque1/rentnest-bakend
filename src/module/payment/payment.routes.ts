@@ -14,6 +14,9 @@ router.post(
   PaymentControllers.createPaymentSession,
 );
 
+router.get('/', authenticate, PaymentControllers.getMyPayments);
+router.get('/:id', authenticate, PaymentControllers.getPaymentById);
+
 const webhookRouter = Router();
 webhookRouter.post('/', PaymentControllers.handleStripeWebhook);
 
