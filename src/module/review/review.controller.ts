@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
-import { catchAsync } from '../utils/cathAsync';
-import { sendResponse } from '../utils/sendResponse';
-import { AuthRequest } from '../middlewares/auth';
+import { catchAsync } from '../../utils/cathAsync';
+import { sendResponse } from '../../utils/sendResponse';
+import { AuthRequest } from '../../middlewares/auth';
 import { ReviewServices } from './review.service';
 
 const createReview = catchAsync(async (req: AuthRequest, res: Response) => {

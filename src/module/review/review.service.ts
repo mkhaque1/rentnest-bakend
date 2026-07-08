@@ -1,8 +1,8 @@
 import httpStatus from 'http-status';
 
-import { AppError } from '../utils/AppError';
+import { AppError } from '../../utils/AppError';
 import { ICreateReviewPayload } from './review.interface';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../../lib/prisma';
 
 const createReview = async (
   tenantId: string,

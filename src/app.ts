@@ -13,7 +13,7 @@ import {
   PaymentRoutes,
   StripeWebhookRoute,
 } from './module/payment/payment.routes';
-import { ReviewRoutes } from './review/review.routes';
+import { ReviewRoutes } from './module/review/review.routes';
 
 const app = express();
 
