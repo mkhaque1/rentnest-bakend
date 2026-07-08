@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodObject } from 'zod';
+import { ZodObject, ZodError } from 'zod';
 import httpStatus from 'http-status';
 
 export const validateRequest =
@@ -13,11 +13,17 @@ export const validateRequest =
       });
       next();
     } catch (err: any) {
-      res.status(httpStatus.BAD_REQUEST).json({
-        success: false,
-        message: 'Validation failed',
-        data: null,
-        errorDetails: err?.errors ?? err,
-      });
+      if (err instanceof ZodError) {
+        return res.status(httpStatus.BAD_REQUEST).json({
+          success: false,
+          message: 'Validation failed',
+          data: null,
+          errorDetails: err.issues.map((issue) => ({
+            path: issue.path.join('.'),
+            message: issue.message,
+          })),
+        });
+      }
+      next(err);
     }
   };
