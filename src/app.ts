@@ -14,6 +14,7 @@ import {
   StripeWebhookRoute,
 } from './module/payment/payment.routes';
 import { ReviewRoutes } from './module/review/review.routes';
+import { AdminRoutes } from './module/admin/admin.routes';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // (all module routes will be added here)
 
+app.use('/api/admin', AdminRoutes);
 app.use('/api/auth', AuthRoutes);
 app.use('/api/categories', CategoryRoutes);
 app.use('/api/properties', PropertyRoutes);
