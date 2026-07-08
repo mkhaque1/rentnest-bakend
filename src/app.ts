@@ -13,6 +13,7 @@ import {
   PaymentRoutes,
   StripeWebhookRoute,
 } from './module/payment/payment.routes';
+import { ReviewRoutes } from './review/review.routes';
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use('/api/categories', CategoryRoutes);
 app.use('/api/properties', PropertyRoutes);
 app.use('/api/rentals', RentalRoutes);
 app.use('/api/payments', PaymentRoutes);
+app.use('/api/reviews', ReviewRoutes);
 
 // not found and error pages
 app.use(notFound);
