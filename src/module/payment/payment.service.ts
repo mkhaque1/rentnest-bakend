@@ -57,8 +57,8 @@ const createPaymentSession = async (
         quantity: 1,
       },
     ],
-    success_url: `${config.app_url}/api/payments/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${config.app_url}/api/payments/cancel`,
+    success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
     metadata: {
       rentalRequestId: rental.id,
       tenantId,
