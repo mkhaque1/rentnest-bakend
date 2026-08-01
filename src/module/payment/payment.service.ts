@@ -126,8 +126,10 @@ const getMyPayments = async (userId: string) => {
 };
 
 const getPaymentById = async (id: string, userId: string, role: string) => {
-  const payment = await prisma.payment.findUnique({
-    where: { id },
+  let payment = await prisma.payment.findFirst({
+    where: {
+      OR: [{ id }, { transactionId: id }],
+    },
     include: { rentalRequest: { include: { property: true } } },
   });
 
@@ -142,6 +144,42 @@ const getPaymentById = async (id: string, userId: string, role: string) => {
       'You do not have access to this payment',
       httpStatus.FORBIDDEN,
     );
+  }
+
+  if (payment.status === 'PENDING') {
+    try {
+      const session = await stripe.checkout.sessions.retrieve(
+        payment.transactionId,
+      );
+      if (session.payment_status === 'paid') {
+        const [updatedPayment] = await prisma.$transaction([
+          prisma.payment.update({
+            where: { id: payment.id },
+            data: { status: 'COMPLETED', paidAt: new Date() },
+            include: { rentalRequest: { include: { property: true } } },
+          }),
+          prisma.rentalRequest.update({
+            where: { id: payment.rentalRequestId },
+            data: { status: 'ACTIVE' },
+          }),
+        ]);
+        payment = updatedPayment;
+      } else if (session.status === 'expired') {
+        const [updatedPayment] = await prisma.$transaction([
+          prisma.payment.update({
+            where: { id: payment.id },
+            data: { status: 'FAILED' },
+            include: { rentalRequest: { include: { property: true } } },
+          }),
+        ]);
+        payment = updatedPayment;
+      }
+    } catch (error) {
+      console.error(
+        'Error retrieving/updating Stripe session status in getPaymentById:',
+        error,
+      );
+    }
   }
 
   return payment;
